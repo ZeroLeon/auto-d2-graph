@@ -164,8 +164,9 @@ class EvaluationAgent:
 
         # Check for consistent formatting
         properly_indented = sum(1 for line in lines if line.strip() and (line.startswith('  ') or line.startswith('"')))
-        if properly_indented > 0:
-            indentation_ratio = properly_indented / len([l for l in lines if l.strip()])
+        non_empty_lines = [l for l in lines if l.strip()]
+        if properly_indented > 0 and len(non_empty_lines) > 0:
+            indentation_ratio = properly_indented / len(non_empty_lines)
             score += indentation_ratio * 0.2
 
         return min(score, 1.0)
