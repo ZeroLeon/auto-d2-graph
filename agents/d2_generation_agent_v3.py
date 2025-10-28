@@ -320,6 +320,10 @@ class D2GenerationAgentV3:
 
         # Create module groups
         for module_name, component_names in modules.items():
+            # Skip "default" module group as it's redundant
+            if module_name == 'default':
+                continue
+
             if len(component_names) > 1:  # Only group modules with multiple components
                 group_def = f'"{module_name}_group" {{'
                 group_def += f'\n  label: "Module: {module_name}"'
