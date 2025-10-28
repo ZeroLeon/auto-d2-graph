@@ -242,9 +242,23 @@ class DiagramDesignAgentV3:
         # Sort by importance score
         component_scores.sort(key=lambda x: x[1], reverse=True)
 
-        # Select top components based on diagram complexity
+        # Prioritize classes and functions, then add selective variables
+        classes_funcs = [(comp, score) for comp, score in component_scores
+                        if comp.type in [ComponentType.CLASS, ComponentType.FUNCTION, ComponentType.MODULE]]
+        variables = [(comp, score) for comp, score in component_scores
+                    if comp.type == ComponentType.VARIABLE]
+
+        # Always include all classes and functions
+        selected = [comp for comp, score in classes_funcs]
+
+        # Add only high-scoring variables to fill remaining slots
         max_components = self._determine_optimal_component_count(len(components))
-        selected = [comp for comp, score in component_scores[:max_components]]
+        remaining_slots = max_components - len(selected)
+
+        if remaining_slots > 0 and variables:
+            # Only add variables with meaningful scores (> 0.3)
+            meaningful_vars = [comp for comp, score in variables[:remaining_slots] if score > 0.3]
+            selected.extend(meaningful_vars)
 
         return selected
 
@@ -253,13 +267,16 @@ class DiagramDesignAgentV3:
         """Calculate importance score for a component"""
         score = 0.0
 
-        # Base score for component type
+        # Base score for component type (heavily favor classes/functions)
         type_scores = {
             ComponentType.CLASS: 1.0,
-            ComponentType.FUNCTION: 0.7,
-            ComponentType.MODULE: 0.8
+            ComponentType.FUNCTION: 0.8,
+            ComponentType.MODULE: 0.9,
+            ComponentType.METHOD: 0.7,
+            ComponentType.IMPORT: 0.3,
+            ComponentType.VARIABLE: 0.1  # Much lower score for variables
         }
-        score += type_scores.get(component.type, 0.5)
+        score += type_scores.get(component.type, 0.1)
 
         # Score based on relationships (centrality)
         incoming_count = sum(1 for rel in relationships if rel.target == component.name)

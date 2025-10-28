@@ -141,8 +141,7 @@ class ProfessionalShapeLibrary:
                 stroke_width=1,
                 border_radius=3,
                 additional_styles={
-                    'style.font-size': '11',
-                    'style.font-family': 'monospace'
+                    'style.font-size': '11'
                 }
             ),
 
