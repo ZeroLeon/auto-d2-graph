@@ -1,0 +1,6 @@
+ast
+pathlib
+pydantic>=2.0.0
+pyyaml
+click
+typing-extensions
